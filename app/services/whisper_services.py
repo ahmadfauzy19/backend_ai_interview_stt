@@ -1,130 +1,53 @@
-from faster_whisper import WhisperModel
-import os
+"""
+Whisper Transcription Services
+Main transcription functions
+"""
+
 import time
-import logging
 from typing import List, Dict
+from app.services.model_manager import get_whisper_model
+from app.config import WHISPER_TRANSCRIBE_CONFIG, DEFAULT_LANGUAGE
+from app.logger import setup_logger
+from app.utils.file_utils import validate_file_exists
 
-# =========================
-# Logger setup
-# =========================
+logger = setup_logger(__name__)
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s | %(levelname)s | %(message)s",
-)
 
-logger = logging.getLogger(__name__)
-
-# =========================
-# Model Config
-# =========================
-
-MODEL_NAME = "cahya/faster-whisper-medium-id"
-
-MODEL_CONFIG = {
-    "device": "cpu",
-    "compute_type": "int8",
-}
-
-TRANSCRIBE_CONFIG = {
-    "beam_size": 5,
-    "condition_on_previous_text": False,
-}
-
-# =========================
-# Load model once
-# =========================
-
-logger.info("🚀 Loading Whisper model...")
-start_load = time.time()
-
-model = WhisperModel(MODEL_NAME, **MODEL_CONFIG)
-
-logger.info(
-    "✅ Whisper model loaded in %.2f seconds",
-    time.time() - start_load
-)
-
-# =========================
-# Helpers
-# =========================
-
-def _validate_file(path: str):
-    if not os.path.exists(path):
-        raise FileNotFoundError(f"File tidak ditemukan: {path}")
-
-# =========================
-# Transcribe plain text
-# =========================
-
-def transcribe_audio(audio_file_path: str, language: str = "id") -> str:
+def transcribe_audio(audio_file_path: str, language: str = DEFAULT_LANGUAGE) -> str:
     """
-    Transkripsi audio ke teks dengan timestamp inline
+    Transcribe audio file to plain text
+    
+    Args:
+        audio_file_path: Path to audio file
+        language: Language code (default: "id")
+        
+    Returns:
+        str: Transcribed text
+        
+    Raises:
+        FileNotFoundError: If audio file doesn't exist
     """
-    _validate_file(audio_file_path)
+    validate_file_exists(audio_file_path)
 
-    logger.info("🎧 Start transcribing: %s", audio_file_path)
+    logger.info(f" Start transcribing: {audio_file_path}")
     start_time = time.time()
 
+    model = get_whisper_model()
     segments, info = model.transcribe(
         audio_file_path,
         language=language,
-        **TRANSCRIBE_CONFIG,
+        **WHISPER_TRANSCRIBE_CONFIG,
     )
 
     lines = []
-    count = 0
     for seg in segments:
-        count += 1
-        lines.append(
-            f"[{seg.start:.2f}s -> {seg.end:.2f}s] {seg.text.strip()}"
-        )
-        print(lines[count-1])
+        line = seg.text.strip()
+        if line:
+            lines.append(line)
 
+    elapsed_time = time.time() - start_time
     logger.info(
-        "📝 Transcription finished | segments=%d | time=%.2fs",
-        count,
-        time.time() - start_time
+        f"📝 Transcription finished | segments={len(lines)} | time={elapsed_time:.2f}s"
     )
 
     return "\n".join(lines)
-
-# =========================
-# Transcribe with timestamps
-# =========================
-
-def transcribe_audio_with_timestamps(
-    audio_file_path: str,
-    language: str = "id"
-) -> List[Dict]:
-    """
-    Transkripsi audio dan kembalikan list segment dengan timestamp
-    """
-    _validate_file(audio_file_path)
-
-    logger.info("🎧 Start transcribing (timestamps): %s", audio_file_path)
-    start_time = time.time()
-
-    segments, info = model.transcribe(
-        audio_file_path,
-        language=language,
-        **TRANSCRIBE_CONFIG,
-    )
-
-    results = []
-    count = 0
-    for seg in segments:
-        count += 1
-        results.append({
-            "start": round(seg.start, 2),
-            "end": round(seg.end, 2),
-            "text": seg.text.strip(),
-        })
-
-    logger.info(
-        "📝 Transcription finished | segments=%d | time=%.2fs",
-        count,
-        time.time() - start_time
-    )
-
-    return results

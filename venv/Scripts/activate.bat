@@ -8,7 +8,7 @@ if defined _OLD_CODEPAGE (
     "%SystemRoot%\System32\chcp.com" 65001 > nul
 )
 
-set VIRTUAL_ENV=D:\Dokumen Kerja\padepokan 79\Mini padepokan 79\AI-Interview\backend-ai-interview_python\venv
+set VIRTUAL_ENV=D:\Fauzy\ai_interview\backend_ai_interview_stt\venv
 
 if not defined PROMPT set PROMPT=$P$G
 
