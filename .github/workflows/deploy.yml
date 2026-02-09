@@ -1,0 +1,50 @@
+name: Deploy STT Service
+
+on:
+  push:
+    branches:
+      - development
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup SSH Key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.VM_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Deploy STT to VM
+        env:
+          VM_HOST: ${{ secrets.VM_HOST }}
+          VM_USER: ${{ secrets.VM_USER }}
+        run: |
+          # Sync STT files to VM
+          rsync -avz --delete \
+            --exclude '.git' \
+            --exclude '__pycache__' \
+            --exclude '.venv' \
+            --exclude 'venv' \
+            --exclude '*.pyc' \
+            --exclude 'app/storages/tmp/*' \
+            -e "ssh -o StrictHostKeyChecking=no" \
+            ./ ${VM_USER}@${VM_HOST}:/opt/ai-interview/backend_ai_interview_stt/
+
+          # Rebuild and restart only STT container
+          ssh -o StrictHostKeyChecking=no ${VM_USER}@${VM_HOST} << 'ENDSSH'
+            cd /opt/ai-interview
+            docker compose build stt
+            docker compose up -d stt
+            docker compose ps
+          ENDSSH
+
+      - name: Health Check
+        run: |
+          sleep 20
+          curl -f https://ai-interview.jiwamu.de/ || echo "Health check warning"
