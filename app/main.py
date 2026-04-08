@@ -2,7 +2,7 @@
 AI Interview Backend API
 Main FastAPI application entry point
 """
-
+import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.utils import get_openapi
@@ -17,11 +17,13 @@ from app.logger import setup_logger
 
 logger = setup_logger(__name__)
 
+ROOT_PATH = os.getenv("ROOT_PATH", "")
 # Initialize FastAPI app
 app = FastAPI(
     title=API_TITLE,
     description=API_DESCRIPTION,
-    version=API_VERSION
+    version=API_VERSION,
+    root_path=ROOT_PATH
 )
 
 # Add CORS middleware
