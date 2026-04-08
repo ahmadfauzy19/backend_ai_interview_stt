@@ -23,7 +23,7 @@ jobs:
           VM_USER: ${{ secrets.VM_USER }}
         run: |
           ssh -o StrictHostKeyChecking=no ${VM_USER}@${VM_HOST} << 'ENDSSH'
-            cd /opt/ai-interview/backend_ai_interview_stt
+            cd /opt/ai-interview-v2/backend_ai_interview_stt
             
             # Pull latest code from GitHub
             git pull origin development
