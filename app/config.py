@@ -54,6 +54,10 @@ WHISPER_MODEL_CONFIG: Dict[str, Any] = {
 WHISPER_TRANSCRIBE_CONFIG: Dict[str, Any] = {
     "beam_size": 5,
     "condition_on_previous_text": False,
+    "vad_filter": True,          
+    "vad_parameters": {
+        "min_silence_duration_ms": 500
+    }
 }
 
 # Default language for transcription
