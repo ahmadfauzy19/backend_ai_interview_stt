@@ -23,19 +23,26 @@ jobs:
           VM_USER: ${{ secrets.VM_USER }}
         run: |
           ssh -o StrictHostKeyChecking=no ${VM_USER}@${VM_HOST} << 'ENDSSH'
+            
+            # Masuk ke repo STT
             cd /opt/ai-interview-v2/backend_ai_interview_stt
             
-            # Pull latest code from GitHub
+            # Pull latest code
             git pull origin development
             
-            # Rebuild and restart STT container
-            cd /opt/ai-interview
-            docker compose build stt
-            docker compose up -d stt
+            # Masuk ke root compose
+            cd /opt/ai-interview-v2
+            
+            # Rebuild & restart service yang BENAR
+            docker compose build backend-stt
+            docker compose up -d backend-stt
+            
+            # Debug info
             docker compose ps
+          
           ENDSSH
 
       - name: Health Check
         run: |
           sleep 20
-          curl -f https://ai-interview.jiwamu.de/ || echo "Health check warning"
+          curl -f https://ai-interview.jiwamu.de/stt/docs || echo "Health check warning"
