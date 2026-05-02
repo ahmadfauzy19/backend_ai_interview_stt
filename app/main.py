@@ -23,7 +23,10 @@ app = FastAPI(
     title=API_TITLE,
     description=API_DESCRIPTION,
     version=API_VERSION,
-    root_path=ROOT_PATH
+    root_path=ROOT_PATH,
+    servers=[
+        {"url": "/stt"}
+    ]
 )
 
 # Add CORS middleware
