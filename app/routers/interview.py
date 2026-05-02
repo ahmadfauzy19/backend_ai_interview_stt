@@ -3,7 +3,7 @@ Interview Router
 Endpoints untuk transcription dan audio processing
 """
 
-from fastapi import APIRouter, UploadFile, File, HTTPException
+from fastapi import APIRouter, UploadFile, File, HTTPException, Query
 from datetime import datetime
 
 from app.services.whisper_services import (
@@ -30,7 +30,7 @@ router = APIRouter(prefix="/media", tags=["Media"])
         404: {"description": "File not found"},
     }
 )
-async def transcribe_audio_endpoint(file: UploadFile = File(...)):
+async def transcribe_audio_endpoint(file: UploadFile = File(...), language: str = Query("id", description="Kode bahasa, contoh: id, en, jp")):
     """
     Transcribe audio file to plain text
     
@@ -41,7 +41,7 @@ async def transcribe_audio_endpoint(file: UploadFile = File(...)):
     temp_path = None
     try:
         temp_path = save_temp_file(file)
-        text = transcribe_audio(temp_path, language="id")
+        text = transcribe_audio(temp_path, language=language)
 
         return TranscriptionResponse(
             message="Transkripsi success",

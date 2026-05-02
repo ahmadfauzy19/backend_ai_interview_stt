@@ -57,7 +57,17 @@ WHISPER_TRANSCRIBE_CONFIG: Dict[str, Any] = {
     "vad_filter": True,          
     "vad_parameters": {
         "min_silence_duration_ms": 500
-    }
+    },
+    # anti hallucination
+    "log_prob_threshold": -1.0,
+    "no_speech_threshold": 0.6,
+    "compression_ratio_threshold": 2.4,
+
+    # stabilitas decoding
+    "temperature": [0.0, 0.2, 0.4],
+
+    # anti looping
+    "no_repeat_ngram_size": 3,
 }
 
 # Default language for transcription
