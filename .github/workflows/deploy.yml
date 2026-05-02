@@ -45,4 +45,4 @@ jobs:
       - name: Health Check
         run: |
           sleep 20
-          curl -f https://ai-interview.jiwamu.de/docs || echo "Health check warning"
+          curl -f https://ai-interview.jiwamu.de/stt/docs || echo "Health check warning"
